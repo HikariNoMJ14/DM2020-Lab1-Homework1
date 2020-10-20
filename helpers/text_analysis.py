@@ -1,9 +1,11 @@
 """ Utility function for doing analysis on emotion datasets """
 from collections import Counter, OrderedDict
-import plotly.plotly as py
+import chart_studio.plotly as py
 import plotly.graph_objs as go
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
 
 def get_tokens_and_frequency(token_list):
     """obtain word frequecy from pandas dataframe column of lists"""
@@ -100,10 +102,35 @@ def get_trace(X_pca, data, category, color):
     )
     return trace
 
-def plot_word_cloud(text):
+def plot_word_cloud(frequencies):
     """ Generate word cloud given some input text doc """
-    word_cloud = WordCloud().generate(text)
+    word_cloud = WordCloud().generate_from_frequencies(frequencies)
     plt.figure(figsize=(8,6), dpi=90)
     plt.imshow(word_cloud, interpolation='bilinear')
     plt.axis("off")
+    plt.show()
+
+
+def make_3d_plot(data_reduced, category_data, categories, elev=None, azim=None):
+    col = ['coral', 'blue', 'black', 'm']
+
+    # plot
+    fig = plt.figure(figsize=(25, 10))
+    ax = Axes3D(fig)
+
+    for c, category in zip(col, categories):
+        filtered_reduced_data = data_reduced[category_data == category]
+
+        xs = filtered_reduced_data.T[0]
+        ys = filtered_reduced_data.T[1]
+        zs = filtered_reduced_data.T[2]
+
+        ax.scatter(xs, ys, zs, c=c, marker='o')
+
+    ax.grid(color='gray', linestyle=':', linewidth=2, alpha=0.2)
+    ax.set_xlabel('\nX Label')
+    ax.set_ylabel('\nY Label')
+    ax.set_zlabel('\nZ Label')
+
+    ax.view_init(elev=elev, azim=azim)
     plt.show()
